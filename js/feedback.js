@@ -5,11 +5,10 @@
 
 (function() {
     // ========== 配置区域 ==========
-    // 请将下面的 URL 替换为你的 Google Apps Script Web App URL
-    // 配置方法见下方注释
-    const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxcOy2ZlGO4Hk5y1S9otudxklhfdxJ_8vAkhjftAtY6NJyZTP7YGdd_6OG7GqJtQeZ7/exec';
+    // 飞书机器人 Webhook 地址
+    const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/a9b01b46-7702-458c-a7fe-723b6e411ade';
     
-    // 备用：开发者邮箱（当 WEBHOOK 未配置时使用 mailto）
+    // 备用：开发者邮箱（当 Webhook 失败时使用 mailto）
     const FEEDBACK_EMAIL = '1271398154@qq.com';
     // ========== 配置结束 ==========
     
@@ -370,7 +369,7 @@
     };
     
     // 提交反馈
-    window.submitFeedback = function() {
+    window.submitFeedback = async function() {
         const contentEl = document.getElementById('feedbackContent');
         const contactEl = document.getElementById('feedbackContact');
         const submitBtn = document.querySelector('.feedback-submit');
@@ -400,55 +399,91 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
         }
         
-        // 如果配置了 Webhook，使用兼容方式提交
-        if (WEBHOOK_URL) {
-            // 使用 GET 请求 + URL 参数，兼容性最好
-            const params = new URLSearchParams({
-                type: typeName,
-                page: currentPage,
-                content: content,
-                contact: contact || ''
-            });
-            
-            const url = WEBHOOK_URL + '?' + params.toString();
-            
-            // 方式1：使用隐藏 iframe 提交（最兼容）
-            let iframe = document.getElementById('feedbackIframe');
-            if (!iframe) {
-                iframe = document.createElement('iframe');
-                iframe.id = 'feedbackIframe';
-                iframe.name = 'feedbackIframe';
-                iframe.style.display = 'none';
-                document.body.appendChild(iframe);
+        // 使用飞书机器人发送
+        if (FEISHU_WEBHOOK) {
+            try {
+                // 构建飞书消息卡片
+                const message = {
+                    msg_type: 'interactive',
+                    card: {
+                        header: {
+                            title: {
+                                tag: 'plain_text',
+                                content: '📮 时光工具箱 - 用户反馈'
+                            },
+                            template: typeName === '问题反馈' ? 'red' : (typeName === '改进建议' ? 'blue' : 'green')
+                        },
+                        elements: [
+                            {
+                                tag: 'div',
+                                fields: [
+                                    {
+                                        is_short: true,
+                                        text: {
+                                            tag: 'lark_md',
+                                            content: '**类型**\n' + typeName
+                                        }
+                                    },
+                                    {
+                                        is_short: true,
+                                        text: {
+                                            tag: 'lark_md',
+                                            content: '**页面**\n' + currentPage
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                tag: 'div',
+                                text: {
+                                    tag: 'lark_md',
+                                    content: '**反馈内容**\n' + content
+                                }
+                            },
+                            {
+                                tag: 'div',
+                                text: {
+                                    tag: 'lark_md',
+                                    content: '**联系方式**\n' + (contact || '未提供')
+                                }
+                            },
+                            {
+                                tag: 'note',
+                                elements: [
+                                    {
+                                        tag: 'plain_text',
+                                        content: '⏰ ' + new Date().toLocaleString('zh-CN')
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                };
+                
+                await fetch(FEISHU_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(message)
+                });
+                
+                showFeedbackSuccess('感谢你的反馈！', '已收到，我会认真查看~');
+                
+            } catch (error) {
+                console.error('[feedback] 飞书发送失败:', error);
+                // 降级到邮件方式
+                fallbackToEmail(typeName, currentPage, content, contact);
             }
-            
-            // 设置超时，避免无限等待
-            const timeout = setTimeout(() => {
-                showFeedbackSuccess('感谢你的反馈！', '已收到，我会认真查看~');
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
-                }
-            }, 3000);
-            
-            iframe.onload = function() {
-                clearTimeout(timeout);
-                showFeedbackSuccess('感谢你的反馈！', '已收到，我会认真查看~');
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
-                }
-            };
-            
-            iframe.src = url;
-            
         } else {
-            // 未配置 Webhook，使用邮件方式
+            // 未配置，使用邮件方式
             fallbackToEmail(typeName, currentPage, content, contact);
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
-            }
+        }
+        
+        // 恢复按钮
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
         }
     };
     
