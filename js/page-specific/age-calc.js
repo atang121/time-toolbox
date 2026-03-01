@@ -13,6 +13,11 @@ function initDatePicker(prefix, startYear, endYear) {
     const monthSelect = document.getElementById(prefix + 'Month');
     const daySelect = document.getElementById(prefix + 'Day');
 
+    if (!yearSelect || !monthSelect || !daySelect) {
+        console.error('日期选择器元素未找到:', prefix);
+        return;
+    }
+
     for (let y = endYear; y >= startYear; y--) {
         const opt = document.createElement('option');
         opt.value = y;
@@ -27,6 +32,8 @@ function initDatePicker(prefix, startYear, endYear) {
         updateDays(prefix);
     });
     monthSelect.addEventListener('change', () => updateDays(prefix));
+    
+    console.log('日期选择器初始化完成:', prefix);
 }
 
 function updateMonths(prefix) {

@@ -9,14 +9,25 @@ const lunarDays = ['初一', '初二', '初三', '初四', '初五', '初六', '
     '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
 
 document.addEventListener('DOMContentLoaded', () => {
-    initDatePicker();
-    setToday();
+    console.log('农历转换页面初始化...');
+    try {
+        initDatePicker();
+        setToday();
+        console.log('农历转换页面初始化完成');
+    } catch (e) {
+        console.error('初始化失败:', e);
+    }
 });
 
 function initDatePicker() {
     const yearSelect = document.getElementById('inputYear');
     const monthSelect = document.getElementById('inputMonth');
     const daySelect = document.getElementById('inputDay');
+
+    if (!yearSelect || !monthSelect || !daySelect) {
+        console.error('日期选择器元素未找到');
+        return;
+    }
 
     for (let y = 2100; y >= 1900; y--) {
         const opt = document.createElement('option');
