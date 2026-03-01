@@ -1,15 +1,62 @@
 /**
  * 时光信箱 - 用户反馈模块
+ * 支持 Google Sheets / Formspree 等 Webhook 方式收集反馈
  */
 
 (function() {
-    // 配置：接收反馈的邮箱
-    const FEEDBACK_EMAIL = '1271398154@qq.com';
+    // ========== 配置区域 ==========
+    // 请将下面的 URL 替换为你的 Google Apps Script Web App URL
+    // 配置方法见下方注释
+    const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxcOy2ZlGO4Hk5y1S9otudxklhfdxJ_8vAkhjftAtY6NJyZTP7YGdd_6OG7GqJtQeZ7/exec';
     
-    // 当前选择的反馈类型
+    // 备用：开发者邮箱（当 WEBHOOK 未配置时使用 mailto）
+    const FEEDBACK_EMAIL = '1271398154@qq.com';
+    // ========== 配置结束 ==========
+    
+    /*
+    ============ Google Sheets 配置步骤 ============
+    
+    1. 打开 Google Sheets：https://sheets.google.com
+    2. 新建一个表格，命名为"时光工具箱-用户反馈"
+    3. 在第一行添加表头：时间 | 类型 | 页面 | 内容 | 联系方式
+    4. 点击菜单：扩展程序 → Apps 脚本
+    5. 删除默认代码，粘贴以下代码：
+    
+    ------- 复制以下代码 -------
+    function doPost(e) {
+      var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+      var data = JSON.parse(e.postData.contents);
+      
+      sheet.appendRow([
+        new Date().toLocaleString('zh-CN'),
+        data.type || '',
+        data.page || '',
+        data.content || '',
+        data.contact || ''
+      ]);
+      
+      return ContentService.createTextOutput(JSON.stringify({success: true}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    function doGet(e) {
+      return ContentService.createTextOutput('Feedback API is running');
+    }
+    ------- 代码结束 -------
+    
+    6. 点击"部署" → "新建部署"
+    7. 类型选择"Web 应用"
+    8. 执行身份：选择你自己
+    9. 谁可以访问：选择"任何人"
+    10. 点击"部署"，复制生成的 URL
+    11. 将 URL 粘贴到上面的 WEBHOOK_URL 中
+    
+    =============================================
+    */
+    
     let currentFeedbackType = 'bug';
     
-    // 注入样式
+    // 样式
     const styles = `
         .feedback-float-btn {
             position: fixed;
@@ -323,14 +370,12 @@
     };
     
     // 提交反馈
-    window.submitFeedback = function() {
+    window.submitFeedback = async function() {
         const contentEl = document.getElementById('feedbackContent');
         const contactEl = document.getElementById('feedbackContact');
+        const submitBtn = document.querySelector('.feedback-submit');
         
-        if (!contentEl) {
-            console.error('[feedback] 找不到反馈内容输入框');
-            return;
-        }
+        if (!contentEl) return;
         
         const content = contentEl.value.trim();
         const contact = contactEl ? contactEl.value.trim() : '';
@@ -349,7 +394,51 @@
         const typeName = typeNames[currentFeedbackType] || '反馈';
         const currentPage = document.title || window.location.pathname;
         
-        // 构建邮件内容
+        // 禁用按钮
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+        }
+        
+        // 如果配置了 Webhook，使用 API 提交
+        if (WEBHOOK_URL) {
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',  // Google Apps Script 需要
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: typeName,
+                        page: currentPage,
+                        content: content,
+                        contact: contact
+                    })
+                });
+                
+                // no-cors 模式下无法读取响应，但请求已发送
+                showFeedbackSuccess('感谢你的反馈！', '已收到，我会认真查看~');
+                
+            } catch (error) {
+                console.error('[feedback] 提交失败:', error);
+                // 降级到邮件方式
+                fallbackToEmail(typeName, currentPage, content, contact);
+            }
+        } else {
+            // 未配置 Webhook，使用邮件方式
+            fallbackToEmail(typeName, currentPage, content, contact);
+        }
+        
+        // 恢复按钮
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
+        }
+    };
+    
+    // 邮件降级方案
+    function fallbackToEmail(typeName, currentPage, content, contact) {
         const subject = `【时光工具箱】${typeName}`;
         const body = `反馈类型：${typeName}
 当前页面：${currentPage}
@@ -361,42 +450,32 @@ ${content}
 ---
 发送时间：${new Date().toLocaleString('zh-CN')}`;
         
-        // 使用 mailto 打开邮件客户端
         const mailtoLink = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         
-        // 显示成功状态
-        showFeedbackSuccess();
+        showFeedbackSuccess('感谢你的反馈！', '正在打开邮件...');
         
-        // 打开邮件客户端
         setTimeout(() => {
             window.location.href = mailtoLink;
         }, 300);
-        
-        // 控制台记录
-        console.log('=== 用户反馈 ===');
-        console.log('类型:', typeName);
-        console.log('内容:', content);
-        console.log('联系方式:', contact || '未提供');
-    };
+    }
     
     // 显示成功状态
-    function showFeedbackSuccess() {
+    function showFeedbackSuccess(title, message) {
         const body = document.getElementById('feedbackBody');
         if (body) {
             body.innerHTML = `
                 <div class="feedback-success">
                     <i class="fas fa-check-circle"></i>
-                    <h4>感谢你的反馈！</h4>
-                    <p>正在打开邮件客户端...<br>如果没有自动打开，你也可以直接发邮件至：<br><strong style="color: #d4af37;">${FEEDBACK_EMAIL}</strong></p>
+                    <h4>${title || '感谢你的反馈！'}</h4>
+                    <p>${message || '我会认真查看每一条反馈~'}</p>
                 </div>
             `;
         }
         
-        // 3秒后关闭并重置
         setTimeout(() => {
             closeFeedbackModal();
             setTimeout(resetFeedbackForm, 300);
-        }, 3000);
+        }, 2000);
     }
     
     // 重置表单
@@ -451,7 +530,6 @@ ${content}
     function initFeedback() {
         if (document.getElementById('feedbackFloatBtn')) return;
         
-        // 创建悬浮按钮
         const floatBtn = document.createElement('button');
         floatBtn.id = 'feedbackFloatBtn';
         floatBtn.className = 'feedback-float-btn';
@@ -463,7 +541,6 @@ ${content}
         floatBtn.onclick = openFeedbackModal;
         document.body.appendChild(floatBtn);
         
-        // 创建弹窗
         const modalHtml = `
             <div class="feedback-modal-overlay" id="feedbackModal">
                 <div class="feedback-modal">
@@ -485,7 +562,6 @@ ${content}
         modalContainer.innerHTML = modalHtml;
         document.body.appendChild(modalContainer.firstElementChild);
         
-        // 点击遮罩关闭
         const modal = document.getElementById('feedbackModal');
         if (modal) {
             modal.addEventListener('click', function(e) {
@@ -495,10 +571,9 @@ ${content}
             });
         }
         
-        console.log('[feedback] 时光信箱初始化完成');
+        console.log('[feedback] 时光信箱初始化完成', WEBHOOK_URL ? '(Webhook模式)' : '(邮件模式)');
     }
     
-    // DOM 准备好后初始化
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initFeedback);
     } else {
