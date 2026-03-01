@@ -1,13 +1,18 @@
 /**
- * 年龄计算功能
+ * 年龄计算功能（支持阳历和农历）
  */
+
+let currentCalendarType = 'solar';
+const lunarMonths = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月'];
+const lunarDays = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+    '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+    '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
 
 function initDatePicker(prefix, startYear, endYear) {
     const yearSelect = document.getElementById(prefix + 'Year');
     const monthSelect = document.getElementById(prefix + 'Month');
     const daySelect = document.getElementById(prefix + 'Day');
 
-    // 填充年份
     for (let y = endYear; y >= startYear; y--) {
         const opt = document.createElement('option');
         opt.value = y;
@@ -15,20 +20,38 @@ function initDatePicker(prefix, startYear, endYear) {
         yearSelect.appendChild(opt);
     }
 
-    // 填充月份
-    for (let m = 1; m <= 12; m++) {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m + '月';
-        monthSelect.appendChild(opt);
+    updateMonths(prefix);
+
+    yearSelect.addEventListener('change', () => {
+        if (prefix === 'birth') updateMonths(prefix);
+        updateDays(prefix);
+    });
+    monthSelect.addEventListener('change', () => updateDays(prefix));
+}
+
+function updateMonths(prefix) {
+    const monthSelect = document.getElementById(prefix + 'Month');
+    const currentMonth = parseInt(monthSelect.value) || 1;
+    monthSelect.innerHTML = '';
+
+    if (prefix === 'birth' && currentCalendarType === 'lunar') {
+        for (let m = 1; m <= 12; m++) {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = lunarMonths[m - 1];
+            monthSelect.appendChild(opt);
+        }
+    } else {
+        for (let m = 1; m <= 12; m++) {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m + '月';
+            monthSelect.appendChild(opt);
+        }
     }
 
-    // 填充日期
+    monthSelect.value = Math.min(currentMonth, 12);
     updateDays(prefix);
-
-    // 监听年月变化更新日期
-    yearSelect.addEventListener('change', () => updateDays(prefix));
-    monthSelect.addEventListener('change', () => updateDays(prefix));
 }
 
 function updateDays(prefix) {
@@ -40,17 +63,50 @@ function updateDays(prefix) {
     const month = parseInt(monthSelect.value);
     const currentDay = parseInt(daySelect.value) || 1;
 
-    const daysInMonth = new Date(year, month, 0).getDate();
+    let daysInMonth;
+    if (prefix === 'birth' && currentCalendarType === 'lunar') {
+        daysInMonth = 30;
+    } else {
+        daysInMonth = new Date(year, month, 0).getDate();
+    }
 
     daySelect.innerHTML = '';
     for (let d = 1; d <= daysInMonth; d++) {
         const opt = document.createElement('option');
         opt.value = d;
-        opt.textContent = d + '日';
+        if (prefix === 'birth' && currentCalendarType === 'lunar') {
+            opt.textContent = lunarDays[d - 1];
+        } else {
+            opt.textContent = d + '日';
+        }
         daySelect.appendChild(opt);
     }
 
     daySelect.value = Math.min(currentDay, daysInMonth);
+}
+
+function setCalendarType(type) {
+    currentCalendarType = type;
+    
+    document.querySelectorAll('.calendar-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.type === type) {
+            btn.classList.add('active');
+        }
+    });
+
+    const birthLabel = document.getElementById('birthLabel');
+    const leapMonthOption = document.getElementById('leapMonthOption');
+    
+    if (type === 'solar') {
+        birthLabel.textContent = '出生日期（阳历）';
+        leapMonthOption.style.display = 'none';
+    } else {
+        birthLabel.textContent = '出生日期（农历）';
+        leapMonthOption.style.display = 'block';
+    }
+
+    updateMonths('birth');
 }
 
 function setTodayTarget() {
@@ -63,7 +119,6 @@ function setTodayTarget() {
 
 function setDefaultBirthDate() {
     const today = new Date();
-    // 默认设置为30年前的今天（一个合理的出生日期默认值）
     const defaultYear = today.getFullYear() - 30;
     document.getElementById('birthYear').value = defaultYear;
     document.getElementById('birthMonth').value = 1;
@@ -79,7 +134,42 @@ function getSelectedDate(prefix) {
 }
 
 function calculateAge() {
-    const birthDate = getSelectedDate('birth');
+    let birthDate;
+    let lunarBirthInfo = null;
+    
+    const birthYear = parseInt(document.getElementById('birthYear').value);
+    const birthMonth = parseInt(document.getElementById('birthMonth').value);
+    const birthDay = parseInt(document.getElementById('birthDay').value);
+    
+    if (currentCalendarType === 'lunar') {
+        if (typeof Lunar === 'undefined') {
+            showResult('农历库加载失败，请刷新页面重试', true);
+            return;
+        }
+        
+        try {
+            const isLeapMonth = document.getElementById('isLeapMonth').checked;
+            const lunar = Lunar.fromYmd(birthYear, isLeapMonth ? -birthMonth : birthMonth, birthDay);
+            const solar = lunar.getSolar();
+            birthDate = new Date(solar.getYear(), solar.getMonth() - 1, solar.getDay());
+            
+            lunarBirthInfo = {
+                year: birthYear,
+                month: birthMonth,
+                day: birthDay,
+                isLeap: isLeapMonth,
+                monthStr: (isLeapMonth ? '闰' : '') + lunarMonths[birthMonth - 1],
+                dayStr: lunarDays[birthDay - 1],
+                ganZhi: lunar.getYearInGanZhi()
+            };
+        } catch (error) {
+            showResult('农历日期无效，请检查输入', true);
+            return;
+        }
+    } else {
+        birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+    }
+    
     let targetDate = getSelectedDate('target');
 
     if (isNaN(birthDate.getTime())) {
@@ -96,7 +186,6 @@ function calculateAge() {
         return;
     }
 
-    // 计算精确年龄
     let years = targetDate.getFullYear() - birthDate.getFullYear();
     let months = targetDate.getMonth() - birthDate.getMonth();
     let days = targetDate.getDate() - birthDate.getDate();
@@ -112,25 +201,34 @@ function calculateAge() {
         months += 12;
     }
 
-    // 计算总天数
     const totalDays = Math.floor((targetDate - birthDate) / (1000 * 60 * 60 * 24));
 
-    // 计算下次生日
     let nextBirthday = new Date(targetDate.getFullYear(), birthDate.getMonth(), birthDate.getDate());
     if (nextBirthday <= targetDate) {
         nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
     }
     const daysToNextBirthday = Math.ceil((nextBirthday - targetDate) / (1000 * 60 * 60 * 24));
 
-    // 生肖
     const zodiacAnimals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
     const zodiac = zodiacAnimals[(birthDate.getFullYear() - 4) % 12];
 
-    // 星座
     const constellation = getConstellation(birthDate.getMonth() + 1, birthDate.getDate());
+
+    let birthDateDisplay;
+    if (currentCalendarType === 'lunar') {
+        birthDateDisplay = `
+            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem;">
+                农历 ${lunarBirthInfo.ganZhi}年 ${lunarBirthInfo.monthStr}${lunarBirthInfo.dayStr}<br>
+                <span style="color: rgba(255,255,255,0.4);">（阳历 ${birthDate.getFullYear()}年${birthDate.getMonth()+1}月${birthDate.getDate()}日）</span>
+            </div>
+        `;
+    } else {
+        birthDateDisplay = '';
+    }
 
     let html = `
         <div style="text-align: center;">
+            ${birthDateDisplay}
             <div style="font-size: 2.5rem; color: #d4af37; font-weight: bold; margin-bottom: 0.5rem;">
                 ${years} <span style="font-size: 1rem;">岁</span>
                 ${months > 0 ? `<span style="font-size: 1.5rem; color: #3a86ff;">${months}</span><span style="font-size: 0.9rem;">个月</span>` : ''}
@@ -201,5 +299,7 @@ function showResult(content, isError) {
         resultDiv.style.borderColor = 'rgba(255,255,255,0.1)';
     }
 
-    gsap.from(resultDiv, { opacity: 0, y: 20, duration: 0.5 });
+    if (typeof gsap !== 'undefined') {
+        gsap.from(resultDiv, { opacity: 0, y: 20, duration: 0.5 });
+    }
 }

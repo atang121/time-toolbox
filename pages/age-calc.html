@@ -28,6 +28,7 @@
             <a href="days-diff.html" class="nav-link">相隔天数计算</a>
             <a href="date-calc.html" class="nav-link">日期加减推算</a>
             <a href="age-calc.html" class="nav-link active">年龄计算</a>
+            <a href="lunar-convert.html" class="nav-link">农历阳历转换</a>
             <a href="rmb-convert.html" class="nav-link">人民币小写改大写</a>
             <a href="short-url.html" class="nav-link">长链接转短链接</a>
             <a href="qrcode.html" class="nav-link">网址转二维码</a>
@@ -44,15 +45,34 @@
                 <i class="fas fa-birthday-cake"></i> 年龄计算
             </h1>
             <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 2rem;">
-                根据出生日期精确计算年龄
+                根据出生日期精确计算年龄（支持阳历/农历）
             </p>
 
+            <!-- 日历类型选择 -->
             <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">出生日期</label>
+                <div class="calendar-type-group">
+                    <button type="button" class="calendar-btn active" data-type="solar" onclick="setCalendarType('solar')">
+                        <i class="fas fa-sun"></i> 阳历生日
+                    </button>
+                    <button type="button" class="calendar-btn" data-type="lunar" onclick="setCalendarType('lunar')">
+                        <i class="fas fa-moon"></i> 农历生日
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label id="birthLabel" style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">出生日期（阳历）</label>
                 <div class="date-picker-group">
                     <select id="birthYear"></select>
                     <select id="birthMonth"></select>
                     <select id="birthDay"></select>
+                </div>
+                <!-- 农历闰月选项 -->
+                <div id="leapMonthOption" style="display: none; margin-top: 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7); cursor: pointer;">
+                        <input type="checkbox" id="isLeapMonth" style="width: auto; margin: 0;">
+                        闰月
+                    </label>
                 </div>
             </div>
 
@@ -103,8 +123,39 @@
         </div>
     </aside>
 
+    <style>
+        .calendar-type-group {
+            display: flex;
+            gap: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .calendar-btn {
+            flex: 1;
+            padding: 0.7rem;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+        .calendar-btn:first-child {
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .calendar-btn.active {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
+            color: #d4af37;
+        }
+        .calendar-btn i {
+            margin-right: 0.3rem;
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <script src="../js/three-scenes.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/page-specific/age-calc.js"></script>
