@@ -9,6 +9,11 @@ let quality = 0.9;
 document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('dropZone');
     
+    if (!dropZone) {
+        console.error('dropZone 元素未找到');
+        return;
+    }
+    
     // 检测微信浏览器
     if (/MicroMessenger/i.test(navigator.userAgent)) {
         const tip = document.getElementById('wechatTip');
@@ -29,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dropZone.classList.remove('dragover');
         handleFiles(e.dataTransfer.files);
     });
+    
+    console.log('图片转换模块初始化完成');
 });
 
 function handleFiles(files) {
@@ -90,25 +97,53 @@ function updateQuality(value) {
 }
 
 async function convertImages() {
-    if (selectedFiles.length === 0) return;
+    console.log('convertImages 被调用，选中文件数:', selectedFiles.length);
+    
+    if (selectedFiles.length === 0) {
+        alert('请先选择图片');
+        return;
+    }
     
     const resultArea = document.getElementById('resultArea');
     const resultList = document.getElementById('resultList');
+    const convertBtn = document.getElementById('convertBtn');
+    
+    if (!resultArea || !resultList) {
+        console.error('结果区域元素未找到');
+        return;
+    }
+    
+    // 禁用按钮，显示处理状态
+    if (convertBtn) {
+        convertBtn.disabled = true;
+        convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 转换中...';
+    }
     
     resultList.innerHTML = '<div style="color: rgba(255,255,255,0.6);"><i class="fas fa-spinner fa-spin"></i> 转换中...</div>';
     resultArea.style.display = 'block';
     
-    gsap.from(resultArea, { opacity: 0, y: 20, duration: 0.3 });
+    if (typeof gsap !== 'undefined') {
+        gsap.from(resultArea, { opacity: 0, y: 20, duration: 0.3 });
+    }
     
     const results = [];
     
-    for (const file of selectedFiles) {
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
         try {
+            console.log(`正在转换第 ${i + 1}/${selectedFiles.length} 个文件:`, file.name);
+            resultList.innerHTML = `<div style="color: rgba(255,255,255,0.6);"><i class="fas fa-spinner fa-spin"></i> 转换中 ${i + 1}/${selectedFiles.length}...</div>`;
             const converted = await convertImage(file);
             results.push(converted);
         } catch (error) {
-            console.error('转换失败:', error);
+            console.error('转换失败:', file.name, error);
         }
+    }
+    
+    // 恢复按钮
+    if (convertBtn) {
+        convertBtn.disabled = false;
+        convertBtn.innerHTML = '<i class="fas fa-exchange-alt"></i> 开始转换';
     }
     
     resultList.innerHTML = '';
@@ -144,6 +179,8 @@ async function convertImages() {
         `;
         resultList.appendChild(downloadAllDiv);
     }
+    
+    console.log('转换完成，成功数:', results.length);
 }
 
 function convertImage(file) {

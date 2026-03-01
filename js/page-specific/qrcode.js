@@ -38,12 +38,23 @@ function generateQRCode() {
     const resultDiv = document.getElementById('qrcodeResult');
     const container = document.getElementById('qrcodeContainer');
     
-    container.innerHTML = '';
+    container.innerHTML = '<div style="color: rgba(0,0,0,0.5); padding: 2rem;">生成中...</div>';
     resultDiv.style.display = 'block';
     
-    gsap.from(resultDiv, { opacity: 0, y: 20, duration: 0.3 });
+    if (typeof gsap !== 'undefined') {
+        gsap.from(resultDiv, { opacity: 0, y: 20, duration: 0.3 });
+    }
+    
+    // 检查 QRCode 库是否加载
+    if (typeof QRCode === 'undefined') {
+        console.error('QRCode 库未加载');
+        // 尝试使用备用 API 生成二维码
+        generateQRCodeFallback(validation.url, container);
+        return;
+    }
     
     try {
+        container.innerHTML = '';
         qrCodeInstance = new QRCode(container, {
             text: validation.url,
             width: 180,
@@ -53,8 +64,29 @@ function generateQRCode() {
             correctLevel: QRCode.CorrectLevel.H
         });
     } catch (error) {
-        container.innerHTML = `<span style="color: #ff6b6b; display: block; padding: 2rem;">二维码生成失败</span>`;
+        console.error('QRCode 生成失败:', error);
+        generateQRCodeFallback(validation.url, container);
     }
+}
+
+function generateQRCodeFallback(url, container) {
+    // 使用在线 API 作为备用方案
+    const encodedUrl = encodeURIComponent(url);
+    const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodedUrl}`;
+    
+    const img = document.createElement('img');
+    img.src = apiUrl;
+    img.alt = '二维码';
+    img.style.cssText = 'width: 180px; height: 180px; display: block;';
+    
+    img.onload = function() {
+        container.innerHTML = '';
+        container.appendChild(img);
+    };
+    
+    img.onerror = function() {
+        container.innerHTML = '<span style="color: #ff6b6b; display: block; padding: 2rem; font-size: 0.9rem;">二维码生成失败，请稍后重试</span>';
+    };
 }
 
 function showQRCodeError(message) {
