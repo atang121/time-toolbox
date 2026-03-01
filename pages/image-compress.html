@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片压缩 - 时光工具箱</title>
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="../css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <!-- 导航栏 -->
+    <nav class="nav-bar">
+        <div class="logo" style="font-family: 'Noto Serif SC', serif; font-size: 1.5rem; color: #d4af37;">
+            <i class="fas fa-hourglass-half"></i> 时光工具箱
+        </div>
+        <button class="share-nav-btn" onclick="shareCurrentTool()" title="分享此工具">
+            <i class="fas fa-share-alt"></i>
+        </button>
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <button class="close-menu" onclick="toggleMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+            <a href="../index.html" class="nav-link">首页</a>
+            <a href="days-diff.html" class="nav-link">相隔天数计算</a>
+            <a href="date-calc.html" class="nav-link">日期加减推算</a>
+            <a href="age-calc.html" class="nav-link">年龄计算</a>
+            <a href="lunar-convert.html" class="nav-link">农历阳历转换</a>
+            <a href="rmb-convert.html" class="nav-link">人民币小写改大写</a>
+            <a href="short-url.html" class="nav-link">长链接转短链接</a>
+            <a href="qrcode.html" class="nav-link">网址转二维码</a>
+            <a href="image-convert.html" class="nav-link">图片格式转换</a>
+            <a href="image-compress.html" class="nav-link active">图片压缩</a>
+            <a href="batch-rename.html" class="nav-link">图片或文件批量改名</a>
+        </div>
+        <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main style="position: relative; z-index: 10; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 5rem 1rem 2rem;">
+        <div class="animate-fade-in form-container" style="max-width: 650px; width: 100%; padding: 2rem; background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+            <h1 style="font-size: clamp(1.3rem, 5vw, 2rem); margin-bottom: 0.5rem; color: #d4af37; font-family: 'Noto Serif SC', serif;">
+                <i class="fas fa-compress-arrows-alt"></i> 图片压缩
+            </h1>
+            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 2rem;">
+                压缩图片大小，调整尺寸和质量
+            </p>
+
+            <!-- 文件选择区域 -->
+            <div id="dropZone" class="drop-zone" onclick="document.getElementById('fileInput').click()">
+                <div id="dropZoneText">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #d4af37; margin-bottom: 1rem;"></i>
+                    <p>点击选择或拖拽图片到此处</p>
+                    <p style="font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 0.5rem;">支持 JPG、PNG、WebP 格式，压缩后统一转为 JPG</p>
+                </div>
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple style="display: none;">
+            </div>
+
+            <!-- 压缩选项 -->
+            <div id="compressOptions" style="display: none; margin-top: 1.5rem;">
+                <!-- 压缩模式 -->
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">压缩模式</label>
+                    <div class="compress-mode-group">
+                        <button type="button" class="mode-btn active" data-mode="quality" onclick="setCompressMode('quality')">
+                            <i class="fas fa-sliders-h"></i> 质量压缩
+                        </button>
+                        <button type="button" class="mode-btn" data-mode="size" onclick="setCompressMode('size')">
+                            <i class="fas fa-bullseye"></i> 目标大小
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 质量设置 -->
+                <div id="qualitySettings">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">
+                            压缩质量：<span id="qualityValue">80</span>%
+                        </label>
+                        <input type="range" id="qualitySlider" min="10" max="100" value="80" 
+                               class="quality-slider" oninput="updateQuality(this.value)">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 0.3rem;">
+                            <span>文件更小</span>
+                            <span>质量更高</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 目标大小设置 -->
+                <div id="sizeSettings" style="display: none;">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">目标文件大小</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" id="targetSize" value="200" min="10" max="10000" 
+                                   style="flex: 1; padding: 0.6rem; font-size: 1rem;">
+                            <select id="sizeUnit" style="padding: 0.6rem; min-width: 70px;">
+                                <option value="kb" selected>KB</option>
+                                <option value="mb">MB</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 尺寸调整 -->
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7); cursor: pointer; margin-bottom: 0.5rem;">
+                        <input type="checkbox" id="resizeEnabled" style="width: auto; margin: 0;" onchange="toggleResize()">
+                        调整尺寸
+                    </label>
+                    <div id="resizeOptions" style="display: none; margin-top: 0.5rem;">
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <input type="number" id="resizeWidth" placeholder="宽度" style="width: 80px; padding: 0.5rem; font-size: 0.9rem;">
+                            <span style="color: rgba(255,255,255,0.5);">×</span>
+                            <input type="number" id="resizeHeight" placeholder="高度" style="width: 80px; padding: 0.5rem; font-size: 0.9rem;">
+                            <span style="font-size: 0.8rem; color: rgba(255,255,255,0.4);">像素</span>
+                            <label style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: rgba(255,255,255,0.6); cursor: pointer; margin-left: 0.5rem;">
+                                <input type="checkbox" id="keepRatio" checked style="width: auto; margin: 0;">
+                                保持比例
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="compressImages()">
+                    <i class="fas fa-compress"></i> 开始压缩
+                </button>
+            </div>
+
+            <!-- 结果区域 -->
+            <div id="resultArea" style="display: none; margin-top: 1.5rem;">
+                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 0.8rem;">
+                    压缩结果
+                </div>
+                <div id="resultList"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 交互提示 -->
+    <div class="hint-system">
+        <i class="fas fa-lightbulb"></i> 选择图片后可调整压缩质量和尺寸
+    </div>
+
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-handle">
+            <i class="fas fa-chevron-left" style="color: rgba(255,255,255,0.5);"></i>
+        </div>
+        <h3 style="color: #d4af37; margin-bottom: 1.5rem;">使用说明</h3>
+        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.8;">
+            <p style="margin-bottom: 1rem;"><strong>功能介绍：</strong></p>
+            <p>压缩图片文件大小，适合上传到有大小限制的平台。</p>
+            
+            <ul style="margin: 1rem 0; padding-left: 1rem;">
+                <li style="margin-bottom: 0.5rem;"><strong>质量压缩</strong>：调整压缩比例</li>
+                <li style="margin-bottom: 0.5rem;"><strong>目标大小</strong>：压缩到指定大小</li>
+                <li style="margin-bottom: 0.5rem;"><strong>尺寸调整</strong>：缩小图片尺寸</li>
+            </ul>
+            
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">
+                    <i class="fas fa-info-circle"></i> 本地处理，图片不会上传服务器
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <style>
+        body { overflow-y: auto !important; }
+        .drop-zone {
+            border: 2px dashed rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.02);
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #d4af37;
+            background: rgba(212, 175, 55, 0.05);
+        }
+        .compress-mode-group {
+            display: flex;
+            gap: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 0.7rem;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+        .mode-btn:first-child {
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .mode-btn.active {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
+            color: #d4af37;
+        }
+        .mode-btn i {
+            margin-right: 0.3rem;
+        }
+        .quality-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        .quality-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #d4af37;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .result-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        .result-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        .result-card-name {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 200px;
+        }
+        .result-card-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .stat-label {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.75rem;
+        }
+        .stat-value {
+            color: #fff;
+        }
+        .stat-value.highlight {
+            color: #4CAF50;
+        }
+        .download-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 6px;
+            color: #d4af37;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .download-btn:hover {
+            background: rgba(212, 175, 55, 0.3);
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="../js/three-scenes.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/share.js"></script>
+    <script src="../js/feedback.js"></script>
+    <script src="../js/page-specific/image-compress.js"></script>
+    <script>
+        const sceneManager = new SceneManager('canvas-container');
+        sceneManager.createImageConvertScene();
+        sceneManager.animate();
+        
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const menuOverlay = document.getElementById('menuOverlay');
+            navLinks.classList.toggle('active');
+            menuOverlay.classList.toggle('active');
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+        }
+    </script>
+</body>
+</html>

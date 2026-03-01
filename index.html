@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>时光工具箱 - 实用小工具集</title>
-    <meta name="description" content="日期计算、金额转换、短链接、二维码、图片格式与批量改名，一站式实用小工具。">
+    <meta name="description" content="日期计算、金额转换、短链接、二维码、图片压缩与格式转换、批量改名，一站式实用小工具。">
     <meta property="og:title" content="时光工具箱 - 实用小工具集">
-    <meta property="og:description" content="日期计算、金额转换、短链接、二维码、图片格式与批量改名，一站式实用小工具。">
+    <meta property="og:description" content="日期计算、金额转换、短链接、二维码、图片压缩与格式转换、批量改名，一站式实用小工具。">
     <meta property="og:type" content="website">
     <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -40,6 +40,7 @@
             <a href="pages/short-url.html" class="nav-link">长链接转短链接</a>
             <a href="pages/qrcode.html" class="nav-link">网址转二维码</a>
             <a href="pages/image-convert.html" class="nav-link">图片格式转换</a>
+            <a href="pages/image-compress.html" class="nav-link">图片压缩</a>
             <a href="pages/batch-rename.html" class="nav-link">图片或文件批量改名</a>
         </div>
         <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
@@ -88,6 +89,10 @@
                     <i class="fas fa-image"></i>
                     <span>图片格式转换</span>
                 </a>
+                <a href="pages/image-compress.html" class="tool-card">
+                    <i class="fas fa-compress-arrows-alt"></i>
+                    <span>图片压缩</span>
+                </a>
                 <a href="pages/batch-rename.html" class="tool-card">
                     <i class="fas fa-file-signature"></i>
                     <span>图片或文件批量改名</span>
@@ -126,6 +131,7 @@
             <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>长链接转短链接</li>
             <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>网址生成二维码</li>
             <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>图片格式转换</li>
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>图片压缩（按质量/目标大小）</li>
             <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>图片或文件批量改名</li>
         </ul>
         <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -190,6 +196,7 @@
     <script src="js/three-scenes.js"></script>
     <script src="js/main.js"></script>
     <script src="js/share.js"></script>
+    <script src="js/feedback.js"></script>
     <script>
         const sceneManager = new SceneManager('canvas-container');
         sceneManager.createHomeScene();
