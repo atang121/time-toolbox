@@ -17,7 +17,11 @@ function shareWebsite(title, text, url) {
     text = text || '日期计算、农历转换、金额转换、短链接、二维码等实用工具，免费使用！';
     url = url || window.location.href;
 
-    if (navigator.share) {
+    // 检测是否为移动设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // 只在移动设备上使用系统原生分享，电脑端直接显示自定义弹窗
+    if (isMobile && navigator.share) {
         navigator.share({
             title: title,
             text: text,
