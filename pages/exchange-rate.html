@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时汇率换算 - 时光工具箱</title>
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="../css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <!-- 导航栏 -->
+    <nav class="nav-bar">
+        <div class="logo" style="font-family: 'Noto Serif SC', serif; font-size: 1.5rem; color: #d4af37;">
+            <i class="fas fa-hourglass-half"></i> 时光工具箱
+        </div>
+        <button class="share-nav-btn" onclick="shareCurrentTool()" title="分享此工具">
+            <i class="fas fa-share-alt"></i>
+        </button>
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <button class="close-menu" onclick="toggleMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+            <a href="../index.html" class="nav-link">首页</a>
+            <a href="days-diff.html" class="nav-link">相隔天数计算</a>
+            <a href="date-calc.html" class="nav-link">日期加减推算</a>
+            <a href="age-calc.html" class="nav-link">年龄计算</a>
+            <a href="lunar-convert.html" class="nav-link">农历阳历转换</a>
+            <a href="rmb-convert.html" class="nav-link">人民币小写改大写</a>
+            <a href="exchange-rate.html" class="nav-link active">实时汇率换算</a>
+            <a href="short-url.html" class="nav-link">长链接转短链接</a>
+            <a href="qrcode.html" class="nav-link">网址转二维码</a>
+            <a href="image-convert.html" class="nav-link">图片格式转换</a>
+            <a href="image-compress.html" class="nav-link">图片压缩</a>
+            <a href="batch-rename.html" class="nav-link">图片或文件批量改名</a>
+        </div>
+        <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main style="position: relative; z-index: 10; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 5rem 1rem 2rem;">
+        <div class="animate-fade-in form-container" style="max-width: 550px; width: 100%; padding: 2rem; background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+            <h1 style="font-size: clamp(1.3rem, 5vw, 2rem); margin-bottom: 0.5rem; color: #d4af37; font-family: 'Noto Serif SC', serif;">
+                <i class="fas fa-exchange-alt"></i> 实时汇率换算
+            </h1>
+            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem;">
+                支持多种货币实时换算，汇率每日更新
+            </p>
+
+            <!-- 汇率更新时间 -->
+            <div id="rateInfo" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-clock"></i>
+                <span id="rateDate">加载汇率中...</span>
+                <button id="refreshBtn" onclick="refreshRates()" title="刷新汇率" style="background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 0.2rem; transition: color 0.2s;">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+
+            <!-- 金额输入 -->
+            <div class="input-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">金额</label>
+                <input type="number" id="amount" value="100" min="0" step="any" 
+                       style="width: 100%; padding: 0.8rem 1rem; font-size: 1.5rem; font-weight: 500; text-align: center;"
+                       oninput="convertCurrency()">
+            </div>
+
+            <!-- 货币选择区 -->
+            <div class="currency-exchange-box">
+                <!-- 源货币 -->
+                <div class="currency-select-group">
+                    <label style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 0.3rem;">从</label>
+                    <select id="fromCurrency" onchange="convertCurrency()" style="width: 100%; padding: 0.7rem; font-size: 1rem;">
+                        <option value="usd">🇺🇸 美元 USD</option>
+                        <option value="cny">🇨🇳 人民币 CNY</option>
+                        <option value="eur">🇪🇺 欧元 EUR</option>
+                        <option value="gbp">🇬🇧 英镑 GBP</option>
+                        <option value="jpy">🇯🇵 日元 JPY</option>
+                        <option value="hkd">🇭🇰 港币 HKD</option>
+                        <option value="krw">🇰🇷 韩元 KRW</option>
+                        <option value="sgd">🇸🇬 新加坡元 SGD</option>
+                        <option value="aud">🇦🇺 澳元 AUD</option>
+                        <option value="cad">🇨🇦 加元 CAD</option>
+                        <option value="chf">🇨🇭 瑞士法郎 CHF</option>
+                        <option value="thb">🇹🇭 泰铢 THB</option>
+                        <option value="myr">🇲🇾 马来西亚林吉特 MYR</option>
+                        <option value="inr">🇮🇳 印度卢比 INR</option>
+                        <option value="rub">🇷🇺 俄罗斯卢布 RUB</option>
+                    </select>
+                </div>
+
+                <!-- 交换按钮 -->
+                <button class="swap-btn" onclick="swapCurrencies()" title="交换货币">
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+
+                <!-- 目标货币 -->
+                <div class="currency-select-group">
+                    <label style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 0.3rem;">到</label>
+                    <select id="toCurrency" onchange="convertCurrency()" style="width: 100%; padding: 0.7rem; font-size: 1rem;">
+                        <option value="cny">🇨🇳 人民币 CNY</option>
+                        <option value="usd">🇺🇸 美元 USD</option>
+                        <option value="eur">🇪🇺 欧元 EUR</option>
+                        <option value="gbp">🇬🇧 英镑 GBP</option>
+                        <option value="jpy">🇯🇵 日元 JPY</option>
+                        <option value="hkd">🇭🇰 港币 HKD</option>
+                        <option value="krw">🇰🇷 韩元 KRW</option>
+                        <option value="sgd">🇸🇬 新加坡元 SGD</option>
+                        <option value="aud">🇦🇺 澳元 AUD</option>
+                        <option value="cad">🇨🇦 加元 CAD</option>
+                        <option value="chf">🇨🇭 瑞士法郎 CHF</option>
+                        <option value="thb">🇹🇭 泰铢 THB</option>
+                        <option value="myr">🇲🇾 马来西亚林吉特 MYR</option>
+                        <option value="inr">🇮🇳 印度卢比 INR</option>
+                        <option value="rub">🇷🇺 俄罗斯卢布 RUB</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 转换结果 -->
+            <div id="resultBox" class="result-box" style="margin-top: 1.5rem;">
+                <div class="result-main">
+                    <span id="resultAmount">--</span>
+                    <span id="resultCurrency" style="font-size: 1rem; color: rgba(255,255,255,0.6); margin-left: 0.5rem;">CNY</span>
+                </div>
+                <div id="rateDetail" class="rate-detail">
+                    1 USD = -- CNY
+                </div>
+            </div>
+
+            <!-- 快捷金额按钮 -->
+            <div class="quick-amounts" style="margin-top: 1.2rem;">
+                <button class="quick-btn" onclick="setAmount(1)">1</button>
+                <button class="quick-btn" onclick="setAmount(10)">10</button>
+                <button class="quick-btn" onclick="setAmount(100)">100</button>
+                <button class="quick-btn" onclick="setAmount(1000)">1000</button>
+                <button class="quick-btn" onclick="setAmount(10000)">10000</button>
+            </div>
+
+            <!-- 复制按钮 -->
+            <button class="btn-primary" onclick="copyResult()" style="margin-top: 1.5rem;">
+                <i class="fas fa-copy"></i> 复制结果
+            </button>
+        </div>
+    </main>
+
+    <!-- 交互提示 -->
+    <div class="hint-system">
+        <i class="fas fa-lightbulb"></i> 汇率数据每日更新 · 可点击中间按钮交换货币
+    </div>
+
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-handle">
+            <i class="fas fa-chevron-left" style="color: rgba(255,255,255,0.5);"></i>
+        </div>
+        <h3 style="color: #d4af37; margin-bottom: 1.5rem;">使用说明</h3>
+        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.8;">
+            <p style="margin-bottom: 1rem;"><strong>功能介绍：</strong></p>
+            <p>实时查询并换算多种货币汇率，支持常用货币互转。</p>
+            
+            <ul style="margin: 1rem 0; padding-left: 1rem;">
+                <li style="margin-bottom: 0.5rem;"><strong>支持货币</strong>：美元、人民币、欧元、英镑、日元等15种</li>
+                <li style="margin-bottom: 0.5rem;"><strong>更新频率</strong>：汇率数据每日更新</li>
+                <li style="margin-bottom: 0.5rem;"><strong>快捷金额</strong>：点击底部按钮快速设置</li>
+            </ul>
+            
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">
+                    <i class="fas fa-info-circle"></i> 汇率仅供参考，实际交易以银行为准
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <style>
+        body { overflow-y: auto !important; }
+        
+        .currency-exchange-box {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .currency-select-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .swap-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: #d4af37;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .swap-btn:hover {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.5), rgba(212, 175, 55, 0.2));
+            transform: rotate(180deg);
+        }
+        
+        .result-box {
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .result-main {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+        }
+        
+        #resultAmount {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #d4af37;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        .rate-detail {
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .quick-amounts {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .quick-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        
+        .quick-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: rgba(212, 175, 55, 0.3);
+            color: #d4af37;
+        }
+        
+        #refreshBtn:hover {
+            color: #d4af37;
+        }
+        
+        #refreshBtn.loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 480px) {
+            .currency-exchange-box {
+                flex-direction: column;
+            }
+            
+            .swap-btn {
+                margin-top: 0;
+                transform: rotate(90deg);
+            }
+            
+            .swap-btn:hover {
+                transform: rotate(270deg);
+            }
+            
+            #resultAmount {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="../js/three-scenes.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/share.js"></script>
+    <script src="../js/feedback.js"></script>
+    <script src="../js/page-specific/exchange-rate.js"></script>
+    <script>
+        const sceneManager = new SceneManager('canvas-container');
+        sceneManager.createRmbConvertScene();
+        sceneManager.animate();
+        
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const menuOverlay = document.getElementById('menuOverlay');
+            navLinks.classList.toggle('active');
+            menuOverlay.classList.toggle('active');
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+        }
+    </script>
+</body>
+</html>
