@@ -10,12 +10,18 @@
   --transition-speed: 0.4s;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background-color: var(--bg-color);
   color: var(--text-white);
   font-family: 'Noto Sans SC', sans-serif;
+  min-height: 100vh;
 }
 
 h1, h2, h3 {
@@ -236,4 +242,257 @@ button.btn-primary:hover {
 
 .direction-btn.active i {
   color: var(--primary-gold);
+}
+
+/* 移动端汉堡菜单按钮 */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--primary-gold);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1001;
+}
+
+/* 移动端菜单遮罩 */
+.menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
+
+.menu-overlay.active {
+  display: block;
+}
+
+/* ==================== 响应式媒体查询 ==================== */
+
+/* 平板设备 (768px - 1024px) */
+@media screen and (max-width: 1024px) {
+  .nav-bar {
+    padding: 1rem 1.5rem;
+  }
+  
+  .nav-links {
+    gap: 0.8rem;
+  }
+  
+  .nav-link {
+    font-size: 0.75rem !important;
+  }
+  
+  .sidebar {
+    display: none;
+  }
+  
+  .hint-system {
+    display: none;
+  }
+}
+
+/* 手机设备 (小于768px) */
+@media screen and (max-width: 768px) {
+  .nav-bar {
+    padding: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .logo {
+    font-size: 1.2rem !important;
+  }
+  
+  .menu-toggle {
+    display: block;
+  }
+  
+  .nav-links {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 75%;
+    max-width: 300px;
+    height: 100vh;
+    background: rgba(5, 5, 16, 0.98);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    padding: 5rem 1.5rem 2rem;
+    gap: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    border-left: 1px solid var(--glass-border);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .nav-links.active {
+    display: flex;
+    transform: translateX(0);
+  }
+  
+  .nav-link {
+    font-size: 1rem !important;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+  }
+  
+  .nav-link:last-child {
+    border-bottom: none;
+  }
+  
+  .close-menu {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  .sidebar {
+    display: none !important;
+  }
+  
+  .hint-system {
+    display: none !important;
+  }
+  
+  /* 主内容区域 */
+  main {
+    padding: 5rem 1rem 2rem !important;
+    min-height: 100vh !important;
+    height: auto !important;
+    align-items: flex-start !important;
+  }
+  
+  /* 工具卡片容器 */
+  .tool-cards-container {
+    gap: 0.8rem !important;
+  }
+  
+  /* 工具卡片 */
+  .tool-card {
+    padding: 1rem !important;
+    min-width: 80px !important;
+    flex: 1 1 calc(33.333% - 0.6rem) !important;
+    max-width: calc(33.333% - 0.6rem) !important;
+  }
+  
+  .tool-card i {
+    font-size: 1.4rem !important;
+  }
+  
+  .tool-card span {
+    font-size: 0.7rem !important;
+  }
+  
+  /* 表单容器 */
+  .form-container {
+    padding: 1.5rem !important;
+    margin: 0 0.5rem !important;
+    width: calc(100% - 1rem) !important;
+    max-width: 100% !important;
+  }
+  
+  /* 页面标题 */
+  .page-title, h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* 日期选择器 */
+  .date-picker-group {
+    flex-wrap: wrap;
+  }
+  
+  .date-picker-group select {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.3rem;
+  }
+  
+  /* 按钮 */
+  button.btn-primary {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  /* 结果显示 */
+  .result-display {
+    font-size: 1rem;
+    word-break: break-all;
+  }
+  
+  /* 输入框 */
+  input, select, textarea {
+    font-size: 16px !important; /* 防止iOS缩放 */
+    padding: 0.8rem !important;
+  }
+  
+  /* 方向按钮组 */
+  .direction-btn-group {
+    flex-direction: column;
+  }
+  
+  .direction-btn {
+    padding: 1rem;
+  }
+  
+  .direction-btn:first-child {
+    border-right: none;
+    border-bottom: 1px solid var(--glass-border);
+  }
+}
+
+/* 小手机设备 (小于480px) */
+@media screen and (max-width: 480px) {
+  .logo {
+    font-size: 1rem !important;
+  }
+  
+  .logo i {
+    display: none;
+  }
+  
+  main {
+    padding: 4.5rem 0.5rem 1.5rem !important;
+  }
+  
+  .tool-card {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+    max-width: calc(50% - 0.5rem) !important;
+  }
+  
+  .form-container {
+    padding: 1rem !important;
+    border-radius: 15px !important;
+  }
+  
+  .page-title, h1 {
+    font-size: 1.3rem !important;
+  }
+  
+  .date-picker-group select {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.2rem;
+  }
+}
+
+/* 横屏手机 */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+  main {
+    padding-top: 4rem !important;
+  }
+  
+  .nav-links {
+    max-height: 100vh;
+  }
 }

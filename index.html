@@ -17,7 +17,13 @@
         <div class="logo" style="font-family: 'Noto Serif SC', serif; font-size: 1.5rem; color: #d4af37;">
             <i class="fas fa-hourglass-half"></i> 时光工具箱
         </div>
-        <div class="nav-links">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <button class="close-menu" onclick="toggleMenu()">
+                <i class="fas fa-times"></i>
+            </button>
             <a href="index.html" class="nav-link active">首页</a>
             <a href="pages/days-diff.html" class="nav-link">相隔天数计算</a>
             <a href="pages/date-calc.html" class="nav-link">日期加减推算</a>
@@ -28,19 +34,20 @@
             <a href="pages/image-convert.html" class="nav-link">图片格式转换</a>
             <a href="pages/batch-rename.html" class="nav-link">图片或文件批量改名</a>
         </div>
+        <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
     </nav>
 
     <!-- 主内容区域 -->
     <main style="position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 5rem 1rem 2rem;">
-        <div class="text-center animate-fade-in" style="max-width: 800px; padding: 2rem;">
-            <h1 style="font-size: 3.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #d4af37, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        <div class="text-center animate-fade-in" style="max-width: 800px; width: 100%; padding: 1rem;">
+            <h1 class="main-title" style="font-size: clamp(1.8rem, 8vw, 3.5rem); margin-bottom: 1rem; background: linear-gradient(135deg, #d4af37, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                 时光工具箱
             </h1>
-            <p style="font-size: 1.2rem; color: rgba(255,255,255,0.7); margin-bottom: 2rem; line-height: 1.8;">
+            <p style="font-size: clamp(0.9rem, 3vw, 1.2rem); color: rgba(255,255,255,0.7); margin-bottom: 2rem; line-height: 1.8;">
                 探索时间的奥秘，转换数字的魅力。<br>
                 沉浸式体验日期计算与人民币大写转换。
             </p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <div class="tool-cards-container" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                 <a href="pages/days-diff.html" class="tool-card">
                     <i class="fas fa-calendar-alt"></i>
                     <span>相隔天数计算</span>
@@ -109,18 +116,6 @@
     </aside>
 
     <style>
-        body {
-            overflow-y: auto !important;
-        }
-        .nav-links {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-        .nav-link {
-            font-size: 0.8rem !important;
-        }
         .tool-card {
             display: flex;
             flex-direction: column;
@@ -150,6 +145,24 @@
             font-size: 0.8rem;
             text-align: center;
         }
+        @media (max-width: 768px) {
+            .tool-card {
+                flex: 1 1 calc(33.333% - 0.7rem);
+                min-width: 0;
+                padding: 1rem 0.5rem;
+            }
+            .tool-card i {
+                font-size: 1.5rem;
+            }
+            .tool-card span {
+                font-size: 0.7rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .tool-card {
+                flex: 1 1 calc(50% - 0.5rem);
+            }
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -160,6 +173,14 @@
         const sceneManager = new SceneManager('canvas-container');
         sceneManager.createHomeScene();
         sceneManager.animate();
+        
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const menuOverlay = document.getElementById('menuOverlay');
+            navLinks.classList.toggle('active');
+            menuOverlay.classList.toggle('active');
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+        }
     </script>
 </body>
 </html>
