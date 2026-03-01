@@ -49,25 +49,25 @@
 
             <div style="margin-bottom: 1rem;">
                 <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">开始日期</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                    <div class="date-picker-group" style="flex: 1; min-width: 200px;">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <div class="date-picker-group" style="flex: 1;">
                         <select id="startYear"></select>
                         <select id="startMonth"></select>
                         <select id="startDay"></select>
                     </div>
-                    <button onclick="setToday('start')" style="padding: 0.5rem 1rem; background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; color: #d4af37; cursor: pointer; white-space: nowrap;">今天</button>
+                    <button class="today-btn" onclick="setToday('start')" style="padding: 0.5rem 0.8rem; background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; color: #d4af37; cursor: pointer; white-space: nowrap; flex-shrink: 0;">今天</button>
                 </div>
             </div>
 
             <div style="margin-bottom: 1.5rem;">
                 <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">结束日期</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                    <div class="date-picker-group" style="flex: 1; min-width: 200px;">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <div class="date-picker-group" style="flex: 1;">
                         <select id="endYear"></select>
                         <select id="endMonth"></select>
                         <select id="endDay"></select>
                     </div>
-                    <button onclick="setToday('end')" style="padding: 0.5rem 1rem; background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; color: #d4af37; cursor: pointer; white-space: nowrap;">今天</button>
+                    <button class="today-btn" onclick="setToday('end')" style="padding: 0.5rem 0.8rem; background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; color: #d4af37; cursor: pointer; white-space: nowrap; flex-shrink: 0;">今天</button>
                 </div>
             </div>
 

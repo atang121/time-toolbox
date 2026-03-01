@@ -196,10 +196,18 @@ button.btn-primary:hover {
   margin-bottom: 0;
   text-align: center;
   cursor: pointer;
+  min-width: 0;
+  text-overflow: ellipsis;
 }
 
 .date-picker-group select:first-child {
-  flex: 1.5;
+  flex: 1.4;
+  min-width: 75px;
+}
+
+.date-picker-group select:nth-child(2),
+.date-picker-group select:nth-child(3) {
+  min-width: 55px;
 }
 
 /* 方向按钮组 */
@@ -411,12 +419,32 @@ button.btn-primary:hover {
   
   /* 日期选择器 */
   .date-picker-group {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
   }
   
   .date-picker-group select {
-    font-size: 0.9rem;
-    padding: 0.6rem 0.3rem;
+    font-size: 14px !important;
+    padding: 0.7rem 0.4rem !important;
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .date-picker-group select:first-child {
+    flex: 1.3;
+    min-width: 70px;
+  }
+  
+  .date-picker-group select:nth-child(2),
+  .date-picker-group select:nth-child(3) {
+    min-width: 50px;
+  }
+  
+  /* 今天按钮 */
+  .today-btn {
+    padding: 0.5rem 0.8rem !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
   }
   
   /* 按钮 */
@@ -432,9 +460,14 @@ button.btn-primary:hover {
   }
   
   /* 输入框 */
-  input, select, textarea {
+  input, textarea {
     font-size: 16px !important; /* 防止iOS缩放 */
     padding: 0.8rem !important;
+  }
+  
+  select {
+    font-size: 14px !important;
+    padding: 0.7rem 0.5rem !important;
   }
   
   /* 方向按钮组 */
@@ -480,9 +513,32 @@ button.btn-primary:hover {
     font-size: 1.3rem !important;
   }
   
+  .date-picker-group {
+    gap: 0.3rem;
+  }
+  
   .date-picker-group select {
-    font-size: 0.85rem;
-    padding: 0.5rem 0.2rem;
+    font-size: 13px !important;
+    padding: 0.6rem 0.3rem !important;
+  }
+  
+  .date-picker-group select:first-child {
+    min-width: 65px;
+  }
+  
+  .date-picker-group select:nth-child(2),
+  .date-picker-group select:nth-child(3) {
+    min-width: 48px;
+  }
+  
+  .today-btn {
+    padding: 0.5rem 0.6rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  /* 双列布局在小屏幕上的处理 */
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
   }
 }
 
