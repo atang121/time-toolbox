@@ -52,6 +52,7 @@ function showShareFallback(url) {
                 <div class="share-qrcode-section">
                     <div class="share-qrcode-label">手机扫码访问</div>
                     <div id="shareQrcode" class="share-qrcode"></div>
+                    <div class="share-qrcode-title">时光工具箱 - 实用小工具集</div>
                 </div>
             </div>
         </div>
@@ -245,6 +246,12 @@ shareStyles.textContent = `
     .share-qrcode canvas,
     .share-qrcode img {
         display: block;
+    }
+    .share-qrcode-title {
+        margin-top: 0.8rem;
+        font-size: 0.85rem;
+        color: #d4af37;
+        font-weight: 500;
     }
 `;
 document.head.appendChild(shareStyles);
