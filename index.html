@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时光工具箱 - 沉浸式日期与金额工具</title>
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <!-- 导航栏 -->
+    <nav class="nav-bar">
+        <div class="logo" style="font-family: 'Noto Serif SC', serif; font-size: 1.5rem; color: #d4af37;">
+            <i class="fas fa-hourglass-half"></i> 时光工具箱
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link active">首页</a>
+            <a href="pages/days-diff.html" class="nav-link">相隔天数计算</a>
+            <a href="pages/date-calc.html" class="nav-link">日期加减推算</a>
+            <a href="pages/age-calc.html" class="nav-link">年龄计算</a>
+            <a href="pages/rmb-convert.html" class="nav-link">人民币小写改大写</a>
+            <a href="pages/short-url.html" class="nav-link">长链接转短链接</a>
+            <a href="pages/qrcode.html" class="nav-link">网址转二维码</a>
+            <a href="pages/image-convert.html" class="nav-link">图片格式转换</a>
+            <a href="pages/batch-rename.html" class="nav-link">图片或文件批量改名</a>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main style="position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 5rem 1rem 2rem;">
+        <div class="text-center animate-fade-in" style="max-width: 800px; padding: 2rem;">
+            <h1 style="font-size: 3.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #d4af37, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                时光工具箱
+            </h1>
+            <p style="font-size: 1.2rem; color: rgba(255,255,255,0.7); margin-bottom: 2rem; line-height: 1.8;">
+                探索时间的奥秘，转换数字的魅力。<br>
+                沉浸式体验日期计算与人民币大写转换。
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="pages/days-diff.html" class="tool-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>相隔天数计算</span>
+                </a>
+                <a href="pages/date-calc.html" class="tool-card">
+                    <i class="fas fa-calculator"></i>
+                    <span>日期加减推算</span>
+                </a>
+                <a href="pages/age-calc.html" class="tool-card">
+                    <i class="fas fa-birthday-cake"></i>
+                    <span>年龄计算</span>
+                </a>
+                <a href="pages/rmb-convert.html" class="tool-card">
+                    <i class="fas fa-yen-sign"></i>
+                    <span>人民币小写改大写</span>
+                </a>
+                <a href="pages/short-url.html" class="tool-card">
+                    <i class="fas fa-compress-alt"></i>
+                    <span>长链接转短链接</span>
+                </a>
+                <a href="pages/qrcode.html" class="tool-card">
+                    <i class="fas fa-qrcode"></i>
+                    <span>网址转二维码</span>
+                </a>
+                <a href="pages/image-convert.html" class="tool-card">
+                    <i class="fas fa-image"></i>
+                    <span>图片格式转换</span>
+                </a>
+                <a href="pages/batch-rename.html" class="tool-card">
+                    <i class="fas fa-file-signature"></i>
+                    <span>图片或文件批量改名</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- 交互提示 -->
+    <div class="hint-system">
+        <i class="fas fa-mouse"></i> 鼠标悬停右侧侧边栏查看更多 · 点击卡片进入工具
+    </div>
+
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-handle">
+            <i class="fas fa-chevron-left" style="color: rgba(255,255,255,0.5);"></i>
+        </div>
+        <h3 style="color: #d4af37; margin-bottom: 1.5rem;">关于本站</h3>
+        <p style="font-size: 0.9rem; line-height: 1.8; color: rgba(255,255,255,0.7);">
+            这是一个融合了 Three.js 3D 视觉效果的实用工具网站，提供以下功能：
+        </p>
+        <ul style="margin-top: 1rem; font-size: 0.85rem; color: rgba(255,255,255,0.6);">
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>计算两个日期相隔天数</li>
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>日期加减计算</li>
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>精确年龄计算</li>
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>人民币大小写转换</li>
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>长链接转短链接</li>
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>网址生成二维码</li>
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>图片格式转换</li>
+            <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #d4af37; margin-right: 0.5rem;"></i>图片或文件批量改名</li>
+        </ul>
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="font-size: 0.75rem; color: rgba(255,255,255,0.4);">
+                技术栈：Three.js · GSAP · Tailwind CSS
+            </p>
+        </div>
+    </aside>
+
+    <style>
+        body {
+            overflow-y: auto !important;
+        }
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .nav-link {
+            font-size: 0.8rem !important;
+        }
+        .tool-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.2rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.3);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+        .tool-card i {
+            font-size: 1.8rem;
+            color: #d4af37;
+        }
+        .tool-card span {
+            font-size: 0.8rem;
+            text-align: center;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="js/three-scenes.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        const sceneManager = new SceneManager('canvas-container');
+        sceneManager.createHomeScene();
+        sceneManager.animate();
+    </script>
+</body>
+</html>

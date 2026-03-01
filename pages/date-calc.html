@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日期加减推算 - 时光工具箱</title>
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="../css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <!-- 导航栏 -->
+    <nav class="nav-bar">
+        <div class="logo" style="font-family: 'Noto Serif SC', serif; font-size: 1.5rem; color: #d4af37;">
+            <i class="fas fa-hourglass-half"></i> 时光工具箱
+        </div>
+        <div class="nav-links">
+            <a href="../index.html" class="nav-link">首页</a>
+            <a href="days-diff.html" class="nav-link">相隔天数计算</a>
+            <a href="date-calc.html" class="nav-link active">日期加减推算</a>
+            <a href="age-calc.html" class="nav-link">年龄计算</a>
+            <a href="rmb-convert.html" class="nav-link">人民币小写改大写</a>
+            <a href="short-url.html" class="nav-link">长链接转短链接</a>
+            <a href="qrcode.html" class="nav-link">网址转二维码</a>
+            <a href="image-convert.html" class="nav-link">图片格式转换</a>
+            <a href="batch-rename.html" class="nav-link">图片或文件批量改名</a>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main style="position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; height: 100vh;">
+        <div class="animate-fade-in" style="max-width: 500px; padding: 2rem; background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+            <h1 style="font-size: 2rem; margin-bottom: 0.5rem; color: #d4af37; font-family: 'Noto Serif SC', serif;">
+                <i class="fas fa-calculator"></i> 日期加减推算
+            </h1>
+            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 2rem;">
+                从指定日期加减天数、周数或月数
+            </p>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">起始日期</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <div class="date-picker-group" style="flex: 1;">
+                        <select id="baseYear"></select>
+                        <select id="baseMonth"></select>
+                        <select id="baseDay"></select>
+                    </div>
+                    <button onclick="setTodayBase()" style="padding: 0.5rem 1rem; background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; color: #d4af37; cursor: pointer; white-space: nowrap;">今天</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">加减方向</label>
+                <input type="hidden" id="direction" value="add">
+                <div class="direction-btn-group">
+                    <button type="button" class="direction-btn active" data-value="add" onclick="setDirection('add')">
+                        <i class="fas fa-plus"></i> 往后
+                    </button>
+                    <button type="button" class="direction-btn" data-value="subtract" onclick="setDirection('subtract')">
+                        <i class="fas fa-minus"></i> 往前
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">数量</label>
+                    <input type="number" id="amount" value="1" min="0" style="width: 100%;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">单位</label>
+                    <select id="unit" style="width: 100%; height: 42px;">
+                        <option value="days">天</option>
+                        <option value="weeks">周</option>
+                        <option value="months">月</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="calculateDate()">
+                <i class="fas fa-calendar-check"></i> 计算日期
+            </button>
+
+            <div id="result" class="result-display" style="display: none;">
+                <div id="resultContent"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 交互提示 -->
+    <div class="hint-system">
+        <i class="fas fa-lightbulb"></i> 选择日期和单位，计算未来或过去的日期
+    </div>
+
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-handle">
+            <i class="fas fa-chevron-left" style="color: rgba(255,255,255,0.5);"></i>
+        </div>
+        <h3 style="color: #d4af37; margin-bottom: 1.5rem;">使用说明</h3>
+        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.8;">
+            <p style="margin-bottom: 1rem;"><strong>功能介绍：</strong></p>
+            <p>从指定日期开始，加上或减去一定的时间，计算结果日期。</p>
+            <ul style="margin: 1rem 0; padding-left: 1rem;">
+                <li>支持天、周、月三种单位</li>
+                <li>可选择往后（加）或往前（减）</li>
+                <li>显示结果日期和星期</li>
+            </ul>
+            <p style="margin-top: 1rem;"><strong>应用场景：</strong></p>
+            <ul style="margin: 0.5rem 0; padding-left: 1rem;">
+                <li>计算项目截止日期</li>
+                <li>推算合同到期时间</li>
+                <li>计算预产期等</li>
+            </ul>
+        </div>
+    </aside>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="../js/three-scenes.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/page-specific/date-calc.js"></script>
+    <script>
+        const sceneManager = new SceneManager('canvas-container');
+        sceneManager.createDateCalcScene();
+        sceneManager.animate();
+        
+        initDatePicker('base', 1900, 2100);
+        setTodayBase();
+    </script>
+</body>
+</html>

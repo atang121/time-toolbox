@@ -1,0 +1,239 @@
+/* 设计变量与全局样式 */
+:root {
+  --bg-color: #050510;
+  --primary-gold: #d4af37;
+  --secondary-gold: #aa8412;
+  --text-white: #f0f0f0;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --accent-blue: #3a86ff;
+  --transition-speed: 0.4s;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  color: var(--text-white);
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'Noto Serif SC', serif;
+}
+
+/* 3D 容器 */
+#canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* 侧边栏样式 */
+.sidebar {
+  position: fixed;
+  right: -260px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 300px;
+  height: 80vh;
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  border-left: 1px solid var(--glass-border);
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 20px 0 0 20px;
+  transition: right var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  padding: 2rem;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar:hover {
+  right: 0;
+}
+
+.sidebar-handle {
+  position: absolute;
+  left: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 100px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--glass-border);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* 导航栏 */
+.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, rgba(5, 5, 16, 0.8), transparent);
+  z-index: 1000;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.1rem;
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--primary-gold);
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary-gold);
+  box-shadow: 0 0 10px var(--primary-gold);
+}
+
+/* 输入控件样式 */
+input, select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: white;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+button.btn-primary {
+  background: linear-gradient(45deg, var(--primary-gold), var(--secondary-gold));
+  color: black;
+  font-weight: bold;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  width: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button.btn-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+/* 结果显示 */
+.result-display {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  font-size: 1.1rem;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s forwards;
+}
+
+/* 交互提示 */
+.hint-system {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  pointer-events: none;
+  transition: opacity 2s;
+}
+
+/* 自定义日期选择器 */
+.date-picker-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.date-picker-group select {
+  flex: 1;
+  margin-bottom: 0;
+  text-align: center;
+  cursor: pointer;
+}
+
+.date-picker-group select:first-child {
+  flex: 1.5;
+}
+
+/* 方向按钮组 */
+.direction-btn-group {
+  display: flex;
+  gap: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+
+.direction-btn {
+  flex: 1;
+  padding: 0.9rem 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.direction-btn:first-child {
+  border-right: 1px solid var(--glass-border);
+}
+
+.direction-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.direction-btn.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
+  color: var(--primary-gold);
+  font-weight: 500;
+}
+
+.direction-btn.active i {
+  color: var(--primary-gold);
+}
