@@ -116,7 +116,8 @@ async function downloadRenamed() {
     }
     
     const downloadBtn = document.getElementById('downloadBtn');
-    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 打包中...';
+    const originalBtnText = '<i class="fas fa-file-export"></i> 导出改名后的文件';
+    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 读取文件中...';
     downloadBtn.disabled = true;
     
     try {
@@ -130,6 +131,7 @@ async function downloadRenamed() {
         for (let i = 0; i < selectedFiles.length; i++) {
             const file = selectedFiles[i];
             const newName = getNewFileName(file.name, i);
+            downloadBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 处理中 ${i + 1}/${selectedFiles.length}`;
             
             const arrayBuffer = await readFileAsArrayBuffer(file);
             zip.file(newName, arrayBuffer);
@@ -143,27 +145,49 @@ async function downloadRenamed() {
             compressionOptions: { level: 6 }
         });
         
-        // 使用 FileSaver.js 下载（兼容性更好）
+        // 尝试多种下载方式
+        let downloadSuccess = false;
+        
+        // 方式1: FileSaver.js
         if (typeof saveAs !== 'undefined') {
-            saveAs(content, '重命名文件.zip');
-        } else {
-            // 备用方案
-            downloadBlob(content, '重命名文件.zip');
+            try {
+                saveAs(content, '改名后的文件.zip');
+                downloadSuccess = true;
+            } catch (e) {
+                console.warn('saveAs 失败:', e);
+            }
         }
         
-        downloadBtn.innerHTML = '<i class="fas fa-check"></i> 下载完成';
+        // 方式2: 创建 Blob URL 并点击链接
+        if (!downloadSuccess) {
+            try {
+                downloadBlob(content, '改名后的文件.zip');
+                downloadSuccess = true;
+            } catch (e) {
+                console.warn('downloadBlob 失败:', e);
+            }
+        }
+        
+        // 方式3: 在新窗口打开 Blob URL（移动端备用）
+        if (!downloadSuccess) {
+            const url = URL.createObjectURL(content);
+            window.open(url, '_blank');
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
+        }
+        
+        downloadBtn.innerHTML = '<i class="fas fa-check"></i> 导出完成';
         downloadBtn.style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
         
         setTimeout(() => {
-            downloadBtn.innerHTML = '<i class="fas fa-download"></i> 下载重命名后的文件（压缩包）';
+            downloadBtn.innerHTML = originalBtnText;
             downloadBtn.style.background = '';
             downloadBtn.disabled = false;
         }, 2000);
         
     } catch (error) {
-        console.error('打包失败:', error);
-        showDownloadError(error.message || '打包失败，请重试');
-        downloadBtn.innerHTML = '<i class="fas fa-download"></i> 下载重命名后的文件（压缩包）';
+        console.error('导出失败:', error);
+        showDownloadError(error.message || '导出失败，请重试');
+        downloadBtn.innerHTML = '<i class="fas fa-file-export"></i> 导出改名后的文件';
         downloadBtn.disabled = false;
     }
 }

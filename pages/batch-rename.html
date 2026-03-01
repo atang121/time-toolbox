@@ -43,9 +43,15 @@
             <h1 style="font-size: clamp(1.3rem, 5vw, 2rem); margin-bottom: 0.5rem; color: #d4af37; font-family: 'Noto Serif SC', serif;">
                 <i class="fas fa-file-signature"></i> 图片或文件批量改名
             </h1>
-            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 2rem;">
-                批量重命名文件并下载
+            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem;">
+                设置命名规则，预览效果后导出新文件
             </p>
+            
+            <!-- 功能说明 -->
+            <div style="margin-bottom: 1.5rem; padding: 0.7rem 1rem; background: rgba(58, 134, 255, 0.1); border: 1px solid rgba(58, 134, 255, 0.2); border-radius: 8px; font-size: 0.8rem; color: rgba(255,255,255,0.6);">
+                <i class="fas fa-info-circle" style="color: #3a86ff;"></i> 
+                网页无法直接修改本地文件名，此工具会生成改名后的文件副本供您下载保存
+            </div>
 
             <!-- 微信浏览器提示 -->
             <div id="wechatTip" style="display: none; margin-bottom: 1rem; padding: 0.8rem 1rem; background: rgba(255, 152, 0, 0.15); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 8px; font-size: 0.85rem; color: #ffb74d;">
@@ -114,7 +120,7 @@
             </div>
 
             <button class="btn-primary" onclick="downloadRenamed()" id="downloadBtn" style="display: none; margin-top: 1rem;">
-                <i class="fas fa-download"></i> 下载重命名后的文件（压缩包）
+                <i class="fas fa-file-export"></i> 导出改名后的文件
             </button>
         </div>
     </main>
