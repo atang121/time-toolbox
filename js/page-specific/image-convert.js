@@ -9,6 +9,12 @@ let quality = 0.9;
 document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('dropZone');
     
+    // 检测微信浏览器
+    if (/MicroMessenger/i.test(navigator.userAgent)) {
+        const tip = document.getElementById('wechatTip');
+        if (tip) tip.style.display = 'block';
+    }
+    
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.add('dragover');
@@ -185,10 +191,42 @@ function convertImage(file) {
 let convertedResults = [];
 
 function downloadFile(dataUrl, filename) {
+    try {
+        // 将 dataUrl 转为 Blob
+        const arr = dataUrl.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        const blob = new Blob([u8arr], { type: mime });
+        
+        // 使用 FileSaver.js 下载
+        if (typeof saveAs !== 'undefined') {
+            saveAs(blob, filename);
+        } else {
+            downloadBlob(blob, filename);
+        }
+    } catch (error) {
+        console.error('下载失败:', error);
+        alert('下载失败，请重试');
+    }
+}
+
+function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = dataUrl;
+    link.href = url;
     link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
     link.click();
+    setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, 100);
 }
 
 async function downloadAll() {
@@ -199,6 +237,10 @@ async function downloadAll() {
     btn.disabled = true;
     
     try {
+        if (typeof JSZip === 'undefined') {
+            throw new Error('压缩库未加载');
+        }
+        
         const zip = new JSZip();
         
         for (const result of convertedResults) {
@@ -206,13 +248,18 @@ async function downloadAll() {
             zip.file(result.name, base64Data, { base64: true });
         }
         
-        const content = await zip.generateAsync({ type: 'blob' });
+        const content = await zip.generateAsync({ 
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+        });
         
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(content);
-        link.download = '转换后的图片.zip';
-        link.click();
-        URL.revokeObjectURL(link.href);
+        // 使用 FileSaver.js 下载
+        if (typeof saveAs !== 'undefined') {
+            saveAs(content, '转换后的图片.zip');
+        } else {
+            downloadBlob(content, '转换后的图片.zip');
+        }
         
         btn.innerHTML = '<i class="fas fa-check"></i> 下载完成';
         btn.style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
@@ -225,6 +272,7 @@ async function downloadAll() {
         
     } catch (error) {
         console.error('打包失败:', error);
+        alert('打包失败: ' + error.message);
         btn.innerHTML = '<i class="fas fa-download"></i> 全部下载（压缩包）';
         btn.disabled = false;
     }

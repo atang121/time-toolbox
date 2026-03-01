@@ -47,6 +47,11 @@
                 JPG/PNG/WebP 图片格式互转
             </p>
 
+            <!-- 微信浏览器提示 -->
+            <div id="wechatTip" style="display: none; margin-bottom: 1rem; padding: 0.8rem 1rem; background: rgba(255, 152, 0, 0.15); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 8px; font-size: 0.85rem; color: #ffb74d;">
+                <i class="fas fa-exclamation-triangle"></i> 检测到微信浏览器，下载功能可能受限。建议点击右上角菜单，选择"在浏览器中打开"。
+            </div>
+
             <!-- 文件选择区域 -->
             <div id="dropZone" class="drop-zone" onclick="document.getElementById('fileInput').click()">
                 <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #d4af37; margin-bottom: 1rem;"></i>
@@ -216,6 +221,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <script src="../js/three-scenes.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/page-specific/image-convert.js"></script>
