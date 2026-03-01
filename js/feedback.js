@@ -370,7 +370,7 @@
     };
     
     // 提交反馈
-    window.submitFeedback = async function() {
+    window.submitFeedback = function() {
         const contentEl = document.getElementById('feedbackContent');
         const contactEl = document.getElementById('feedbackContact');
         const submitBtn = document.querySelector('.feedback-submit');
@@ -400,40 +400,55 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
         }
         
-        // 如果配置了 Webhook，使用 API 提交
+        // 如果配置了 Webhook，使用兼容方式提交
         if (WEBHOOK_URL) {
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',  // Google Apps Script 需要
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        type: typeName,
-                        page: currentPage,
-                        content: content,
-                        contact: contact
-                    })
-                });
-                
-                // no-cors 模式下无法读取响应，但请求已发送
-                showFeedbackSuccess('感谢你的反馈！', '已收到，我会认真查看~');
-                
-            } catch (error) {
-                console.error('[feedback] 提交失败:', error);
-                // 降级到邮件方式
-                fallbackToEmail(typeName, currentPage, content, contact);
+            // 使用 GET 请求 + URL 参数，兼容性最好
+            const params = new URLSearchParams({
+                type: typeName,
+                page: currentPage,
+                content: content,
+                contact: contact || ''
+            });
+            
+            const url = WEBHOOK_URL + '?' + params.toString();
+            
+            // 方式1：使用隐藏 iframe 提交（最兼容）
+            let iframe = document.getElementById('feedbackIframe');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'feedbackIframe';
+                iframe.name = 'feedbackIframe';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
             }
+            
+            // 设置超时，避免无限等待
+            const timeout = setTimeout(() => {
+                showFeedbackSuccess('感谢你的反馈！', '已收到，我会认真查看~');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
+                }
+            }, 3000);
+            
+            iframe.onload = function() {
+                clearTimeout(timeout);
+                showFeedbackSuccess('感谢你的反馈！', '已收到，我会认真查看~');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
+                }
+            };
+            
+            iframe.src = url;
+            
         } else {
             // 未配置 Webhook，使用邮件方式
             fallbackToEmail(typeName, currentPage, content, contact);
-        }
-        
-        // 恢复按钮
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送反馈';
+            }
         }
     };
     
