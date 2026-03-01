@@ -216,8 +216,22 @@ function calculateAge() {
     }
     const daysToNextBirthday = Math.ceil((nextBirthday - targetDate) / (1000 * 60 * 60 * 24));
 
-    const zodiacAnimals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
-    const zodiac = zodiacAnimals[(birthDate.getFullYear() - 4) % 12];
+    // 生肖必须根据农历年份判断
+    let zodiac = '';
+    if (typeof Lunar !== 'undefined') {
+        try {
+            // 将阳历生日转换为农历，获取正确的生肖
+            const lunarForZodiac = Lunar.fromDate(birthDate);
+            zodiac = lunarForZodiac.getYearShengXiao();
+        } catch (e) {
+            // 降级：使用简单计算（不够准确）
+            const zodiacAnimals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+            zodiac = zodiacAnimals[(birthDate.getFullYear() - 4) % 12];
+        }
+    } else {
+        const zodiacAnimals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+        zodiac = zodiacAnimals[(birthDate.getFullYear() - 4) % 12];
+    }
 
     const constellation = getConstellation(birthDate.getMonth() + 1, birthDate.getDate());
 
