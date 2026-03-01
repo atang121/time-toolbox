@@ -552,3 +552,73 @@ button.btn-primary:hover {
     max-height: 100vh;
   }
 }
+
+/* 分享按钮样式 */
+.share-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 50%;
+  color: #d4af37;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-left: auto;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.share-nav-btn:hover {
+  background: rgba(212, 175, 55, 0.3);
+  transform: scale(1.1);
+}
+
+.share-result-btn {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  color: #d4af37;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.share-result-btn:hover {
+  background: rgba(212, 175, 55, 0.2);
+}
+
+.share-btn-main {
+  padding: 0.8rem 1.5rem;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 25px;
+  color: #d4af37;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.share-btn-main:hover {
+  background: rgba(212, 175, 55, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(212, 175, 55, 0.2);
+}
+
+.share-btn-main i {
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .share-nav-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}
